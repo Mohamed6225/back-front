@@ -1,0 +1,199 @@
+<div class="releve-page">
+
+  <!-- Barre d'action (cachée à l'impression) -->
+  <div class="releve-actions no-print">
+    <button type="button" class="btn-secondary" (click)="retour()">
+      <i class="bi bi-arrow-left"></i>
+      Retour
+    </button>
+
+    @if (client && situation && !chargement) {
+      <app-print-button label="Imprimer le relevé" />
+    }
+  </div>
+
+  <!-- ================= ERREUR ================= -->
+  @if (erreur) {
+    <div class="alert alert-danger">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      {{ erreur }}
+      @if (clientId) {
+        <button type="button" class="btn-retry" (click)="reessayer()">
+          <i class="bi bi-arrow-clockwise"></i>
+          Réessayer
+        </button>
+      }
+    </div>
+  }
+
+  <!-- ================= SKELETON DE CHARGEMENT ================= -->
+  @if (chargement) {
+    <div class="releve-box skeleton-box">
+
+      <!-- En-tête skeleton -->
+      <div class="skeleton-header">
+        <div class="skeleton skeleton-logo"></div>
+        <div>
+          <div class="skeleton skeleton-line-lg"></div>
+          <div class="skeleton skeleton-line-sm"></div>
+        </div>
+      </div>
+
+      <!-- Grille skeleton -->
+      <div class="skeleton-grid">
+        @for (i of [1, 2, 3]; track i) {
+          <div class="skeleton skeleton-card"></div>
+        }
+      </div>
+
+      <!-- Résumé skeleton -->
+      <div class="skeleton-summary">
+        @for (i of [1, 2, 3, 4]; track i) {
+          <div class="skeleton skeleton-summary-card"></div>
+        }
+      </div>
+
+      <!-- Table skeleton -->
+      <div class="skeleton-table">
+        @for (i of [1, 2, 3, 4]; track i) {
+          <div class="skeleton skeleton-row"></div>
+        }
+      </div>
+
+    </div>
+  }
+
+  <!-- ================= CONTENU ================= -->
+  @if (client && situation && !chargement) {
+    <div class="releve-box">
+
+      <!-- ================= EN-TÊTE ================= -->
+      <header class="releve-header">
+        <div class="releve-brand">
+          <div class="brand-logo">
+            <i class="bi bi-truck-front-fill"></i>
+          </div>
+          <div>
+            <h1>FleetLog</h1>
+            <p>Relevé de compte client</p>
+          </div>
+        </div>
+
+        <div class="releve-meta">
+          <div>
+            <strong>Date :</strong>
+            {{ aujourdhui | date:'dd/MM/yyyy' }}
+          </div>
+          <div>
+            <strong>N° :</strong>
+            REL-{{ client.id }}-{{ todayKey }}
+          </div>
+        </div>
+      </header>
+
+      <!-- ================= INFOS CLIENT ================= -->
+      <section class="releve-client">
+        <h2>Informations client</h2>
+        <div class="info-grid">
+          <div>
+            <span>Nom</span>
+            <strong>{{ client.nomClient }}</strong>
+          </div>
+          <div>
+            <span>Téléphone</span>
+            <strong>{{ client.telephone || '—' }}</strong>
+          </div>
+          <div>
+            <span>Identifiant</span>
+            <strong>#{{ client.id }}</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= RÉSUMÉ ================= -->
+      <section class="releve-summary">
+        <div class="summary-card total">
+          <span>Solde actuel (quantités)</span>
+          <strong>{{ situation.soldeQuantite | number:'1.0-2' }}</strong>
+        </div>
+        <div class="summary-card">
+          <span>Total livré</span>
+          <strong>{{ totalLivre | number:'1.0-2' }}</strong>
+        </div>
+        <div class="summary-card">
+          <span>Total réglé</span>
+          <strong>{{ totalRegle | number:'1.0-2' }}</strong>
+        </div>
+        <div class="summary-card">
+          <span>Total encaissé</span>
+          <strong>{{ totalEncaisse | number:'1.0-2' }}</strong>
+        </div>
+      </section>
+
+      <!-- ================= HISTORIQUE ================= -->
+      <section class="releve-historique">
+        <h2>
+          Historique des livraisons et règlements
+          <small>
+            ({{ historique.length }} opération{{ historique.length > 1 ? 's' : '' }})
+          </small>
+        </h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Livré</th>
+              <th>Réglé</th>
+              <th>Prix U.</th>
+              <th>Encaissé</th>
+              <th>Mode</th>
+              <th>Ancien solde</th>
+              <th>Nouveau solde</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of historique; track l.id) {
+              <tr>
+                <td>{{ l.dateLivraison | date:'dd/MM/yyyy' }}</td>
+                <td>{{ l.quantiteLivree | number:'1.0-2' }}</td>
+                <td>{{ l.quantiteReglee | number:'1.0-2' }}</td>
+                <td>{{ l.prixUnitaire | number:'1.0-2' }}</td>
+                <td>{{ l.montantEncaisse | number:'1.0-2' }}</td>
+                <td>{{ labelMode(l.modePaiement) }}</td>
+                <td>{{ l.ancienSolde | number:'1.0-2' }}</td>
+                <td class="strong">{{ l.nouveauSolde | number:'1.0-2' }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="empty">
+                  Aucune opération enregistrée.
+                </td>
+              </tr>
+            }
+          </tbody>
+          @if (historique.length > 0) {
+            <tfoot>
+              <tr>
+                <td><strong>Totaux</strong></td>
+                <td><strong>{{ totalLivre | number:'1.0-2' }}</strong></td>
+                <td><strong>{{ totalRegle | number:'1.0-2' }}</strong></td>
+                <td>—</td>
+                <td><strong>{{ totalEncaisse | number:'1.0-2' }}</strong></td>
+                <td colspan="3"></td>
+              </tr>
+            </tfoot>
+          }
+        </table>
+      </section>
+
+      <!-- ================= PIED DE PAGE ================= -->
+      <footer class="releve-footer">
+        <div>FleetLog — Gestion des livraisons</div>
+        <div>Signature client : _____________________</div>
+      </footer>
+
+    </div>
+  }
+
+</div>

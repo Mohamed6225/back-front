@@ -1,0 +1,19 @@
+# === BACKEND (JAVA) ===
+demo/demo/target/
+target/
+*.class
+
+# === FRONTEND (ANGULAR) ===
+fleetlog-frontend/node_modules/
+fleetlog-frontend/dist/
+fleetlog-frontend/.angular/
+
+# === IDE ===
+.idea/
+.vscode/
+*.iml
+
+# === OS / DIVERS ===
+.DS_Store
+Thumbs.db
+*.log

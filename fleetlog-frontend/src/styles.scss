@@ -1,0 +1,57 @@
+
+:root {
+  --fleet-navy: #17365d;
+  --fleet-khaki: #78866b;
+  --fleet-background: #f4f6f9;
+  --fleet-text: #263445;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--fleet-background);
+  color: var(--fleet-text);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+
+@media print {
+  .sidebar,
+  .topbar,
+  .no-print,
+  .btn-ajouter,
+  button:not(.print-visible) {
+    display: none !important;
+  }
+
+  .app-layout,
+  .main-content,
+  main {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+.print-header { display: none; }

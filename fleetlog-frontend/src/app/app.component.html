@@ -1,0 +1,23 @@
+
+<div class="fleet-layout">
+
+  <app-sidebar
+    [isOpen]="menuOpen"
+    (closeSidebar)="fermerMenu()">
+  </app-sidebar>
+
+  <div
+    class="sidebar-overlay"
+    [class.visible]="menuOpen"
+    (click)="fermerMenu()">
+  </div>
+
+  <main class="main-content">
+    <app-header (menuToggle)="basculerMenu()"></app-header>
+
+    <section class="page-content">
+      <router-outlet></router-outlet>
+    </section>
+  </main>
+
+</div>

@@ -1,0 +1,514 @@
+/* =========================================================
+   RAPPORTS — Rapport journalier
+   ========================================================= */
+
+/* -------- 1. Variables -------- */
+$navy:        #1e407c;
+$navy-dark:   #16325f;
+$navy-light:  #eef2f9;
+
+$green:       #16a34a;
+$green-light: #e7f6ec;
+
+$orange:      #ea8c1e;
+$orange-light:#fdf3e5;
+
+$red:         #dc2626;
+$red-light:   #fdecec;
+
+$text:        #1f2937;
+$text-muted:  #6b7280;
+$border:      #e5e7eb;
+$bg-soft:     #f8fafc;
+$white:       #ffffff;
+
+$radius-sm:   6px;
+$radius:      10px;
+$radius-lg:   14px;
+
+$shadow-sm:   0 1px 2px rgba(15, 23, 42, .04);
+$shadow:      0 1px 3px rgba(15, 23, 42, .06),
+              0 1px 2px rgba(15, 23, 42, .04);
+$shadow-lg:   0 4px 12px rgba(15, 23, 42, .08);
+
+$transition:  .18s ease-in-out;
+
+
+/* -------- 2. Conteneur global -------- */
+.vehicules-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 4px 0 32px;
+  color: $text;
+}
+
+
+/* -------- 3. En-tête de page -------- */
+.page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 4px;
+
+  .eyebrow {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .8px;
+    color: $navy;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    opacity: .85;
+  }
+
+  h1 {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.25;
+    color: $text;
+
+    small {
+      font-size: .6em;
+      font-weight: 500;
+      color: $text-muted;
+      margin-left: 6px;
+    }
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-size: 14px;
+    color: $text-muted;
+  }
+
+  /* Zone date + bouton */
+  .d-flex {
+    align-items: flex-end;
+    gap: 10px;
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: $text-muted;
+      margin-bottom: 4px;
+    }
+
+    .form-control {
+      min-width: 170px;
+      padding: 8px 12px;
+      border: 1px solid $border;
+      border-radius: $radius-sm;
+      font-size: 14px;
+      background: $white;
+      transition: border-color $transition, box-shadow $transition;
+
+      &:focus {
+        outline: none;
+        border-color: $navy;
+        box-shadow: 0 0 0 3px rgba($navy, .12);
+      }
+    }
+  }
+}
+
+
+/* -------- 4. Bouton principal -------- */
+.btn-ajouter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: $white;
+  background: $navy;
+  border: 1px solid $navy;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: background $transition, box-shadow $transition,
+              transform $transition;
+  white-space: nowrap;
+
+  i { font-size: 15px; }
+
+  &:hover:not(:disabled) {
+    background: $navy-dark;
+    border-color: $navy-dark;
+    box-shadow: $shadow-lg;
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .spinner-border-sm {
+    width: 14px;
+    height: 14px;
+    border-width: 2px;
+  }
+}
+
+
+/* -------- 5. Cartes statistiques -------- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  background: $white;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  box-shadow: $shadow;
+  transition: transform $transition, box-shadow $transition;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: $shadow-lg;
+  }
+
+  .stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    font-size: 20px;
+    flex-shrink: 0;
+
+    &.navy   { background: $navy-light;   color: $navy; }
+    &.green  { background: $green-light;  color: $green; }
+    &.orange { background: $orange-light; color: $orange; }
+  }
+
+  > div:last-child {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+
+    span {
+      font-size: 12.5px;
+      font-weight: 500;
+      color: $text-muted;
+      line-height: 1.2;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+    }
+
+    strong {
+      font-size: 22px;
+      font-weight: 700;
+      color: $text;
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+  }
+}
+
+
+/* -------- 6. Carte du tableau -------- */
+.table-card {
+  background: $white;
+  border: 1px solid $border;
+  border-radius: $radius-lg;
+  box-shadow: $shadow;
+  overflow: hidden;
+
+  .table-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 18px 22px;
+    border-bottom: 1px solid $border;
+    background: linear-gradient(180deg, #fbfcfe 0%, $white 100%);
+
+    h2 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 700;
+      color: $text;
+    }
+
+    p {
+      margin: 2px 0 0;
+      font-size: 13px;
+      color: $text-muted;
+    }
+
+    .search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+      min-width: 260px;
+
+      i {
+        position: absolute;
+        left: 12px;
+        color: $text-muted;
+        font-size: 14px;
+        pointer-events: none;
+      }
+
+      input {
+        width: 100%;
+        padding: 9px 12px 9px 36px;
+        font-size: 14px;
+        border: 1px solid $border;
+        border-radius: $radius-sm;
+        background: $bg-soft;
+        transition: border-color $transition, background $transition,
+                    box-shadow $transition;
+
+        &:focus {
+          outline: none;
+          background: $white;
+          border-color: $navy;
+          box-shadow: 0 0 0 3px rgba($navy, .12);
+        }
+
+        &::placeholder { color: #9ca3af; }
+      }
+    }
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 22px;
+    font-size: 12.5px;
+    color: $text-muted;
+    border-top: 1px solid $border;
+    background: $bg-soft;
+
+    i { margin-right: 6px; color: $green; }
+  }
+}
+
+
+/* -------- 7. Tableau fleet -------- */
+.fleet-table {
+  width: 100%;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+
+  thead th {
+    padding: 12px 18px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    color: $text-muted;
+    background: $bg-soft;
+    border-bottom: 1px solid $border;
+    white-space: nowrap;
+
+    &.text-end { text-align: right; }
+  }
+
+  tbody td {
+    padding: 14px 18px;
+    border-bottom: 1px solid $border;
+    color: $text;
+    vertical-align: middle;
+
+    &.text-end { text-align: right; }
+  }
+
+  tbody tr {
+    transition: background $transition;
+
+    &:hover { background: $bg-soft; }
+    &:last-child td { border-bottom: none; }
+  }
+
+  /* Lien sur le nom du client */
+  a.fw-semibold {
+    color: $navy;
+    font-weight: 600;
+    transition: color $transition;
+
+    &:hover {
+      color: $navy-dark;
+      text-decoration: underline !important;
+    }
+  }
+
+  /* Ligne de total */
+  tfoot td {
+    padding: 14px 18px;
+    font-weight: 700;
+    font-size: 13.5px;
+    background: $bg-soft;
+    border-top: 2px solid $border;
+    color: $text;
+  }
+
+  /* État vide */
+  .text-center.text-muted {
+    padding: 40px 20px !important;
+    font-size: 14px;
+
+    &::before {
+      content: "📭";
+      display: block;
+      font-size: 28px;
+      margin-bottom: 8px;
+      opacity: .6;
+    }
+  }
+}
+
+
+/* -------- 8. Badges de solde -------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 68px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  border-radius: 999px;
+  letter-spacing: .2px;
+
+  &.bg-success {
+    color: $green;
+    background: $green-light;
+  }
+
+  &.bg-warning {
+    color: $orange;
+    background: $orange-light;
+  }
+}
+
+
+/* -------- 9. Alertes -------- */
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: $radius;
+  font-size: 14px;
+  border: 1px solid transparent;
+  animation: fadeIn .22s ease-in-out;
+
+  i { font-size: 16px; flex-shrink: 0; }
+
+  &.alert-info {
+    color: $navy;
+    background: $navy-light;
+    border-color: rgba($navy, .15);
+  }
+
+  &.alert-danger {
+    color: $red;
+    background: $red-light;
+    border-color: rgba($red, .18);
+  }
+
+  .btn-outline-danger {
+    margin-left: auto;
+    padding: 4px 10px;
+    font-size: 12.5px;
+    color: $red;
+    background: transparent;
+    border: 1px solid rgba($red, .35);
+    border-radius: $radius-sm;
+    cursor: pointer;
+    transition: background $transition, color $transition;
+
+    &:hover {
+      background: $red;
+      color: $white;
+    }
+  }
+
+  .spinner-border-sm {
+    width: 14px;
+    height: 14px;
+    border-width: 2px;
+  }
+}
+
+
+/* -------- 10. Animation d'apparition -------- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+
+/* -------- 11. Responsive fin -------- */
+@media (max-width: 720px) {
+  .page-heading {
+    flex-direction: column;
+    align-items: stretch;
+
+    .d-flex {
+      flex-direction: column;
+      align-items: stretch;
+
+      .form-control { width: 100%; }
+      .btn-ajouter  { width: 100%; justify-content: center; }
+    }
+  }
+
+  .table-card .table-heading {
+    flex-direction: column;
+    align-items: stretch;
+
+    .search-box {
+      min-width: 0;
+      width: 100%;
+    }
+  }
+
+  .fleet-table {
+    thead th,
+    tbody td,
+    tfoot td {
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+    }
+
+    thead th { font-size: 10.5px; }
+    tbody td { font-size: 13px; }
+  }
+
+  .stat-card { padding: 14px 16px; }
+}

@@ -1,0 +1,158 @@
+<div class="vehicules-page">
+
+  <!-- ================= EN-TÊTE ================= -->
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">RAPPORTS</span>
+      <h1>
+        Relevés clients
+        @if (chargement) {
+          <span class="spinner-inline"></span>
+        }
+      </h1>
+      <p>
+        Cliquez sur un client pour imprimer son relevé de compte.
+        @if (derniereMaj) {
+          <small class="last-update">
+            · Mis à jour à {{ derniereMaj | date:'HH:mm:ss' }}
+          </small>
+        }
+      </p>
+    </div>
+  </div>
+
+  <!-- ================= ERREUR ================= -->
+  @if (erreur) {
+    <div class="alert alert-danger">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      {{ erreur }}
+      <button class="btn btn-sm btn-outline-danger ms-3"
+              type="button"
+              (click)="charger()">
+        Réessayer
+      </button>
+    </div>
+  }
+
+  <!-- ================= KPI ================= -->
+  <div class="stats-grid" [class.is-refreshing]="rafraichissement">
+
+    <article class="stat-card">
+      <div class="stat-icon navy">
+        <i class="bi bi-people-fill"></i>
+      </div>
+      <div>
+        <span>Clients disponibles</span>
+        <strong>{{ nombreTotal }}</strong>
+      </div>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-icon green">
+        <i class="bi bi-cash-stack"></i>
+      </div>
+      <div>
+        <span>Solde total</span>
+        <strong>{{ soldeTotal | number:'1.0-2' }}</strong>
+      </div>
+    </article>
+
+  </div>
+
+  <!-- ================= TABLE ================= -->
+  <section class="table-card">
+
+    <div class="table-heading">
+      <div>
+        <h2>Choisir un client</h2>
+        <p>
+          @if (premierChargement) {
+            Chargement…
+          } @else {
+            {{ clientsFiltres.length }} client(s)
+          }
+        </p>
+      </div>
+
+      <div class="search-box">
+        <i class="bi bi-search"></i>
+        <input type="search"
+               [(ngModel)]="recherche"
+               placeholder="Nom, téléphone..."
+               aria-label="Rechercher un client">
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table fleet-table align-middle">
+        <thead>
+          <tr>
+            <th>CLIENT</th>
+            <th>TÉLÉPHONE</th>
+            <th>SOLDE</th>
+            <th>RELEVÉ</th>
+          </tr>
+        </thead>
+
+        <tbody [class.is-refreshing]="rafraichissement">
+
+          <!-- ✅ Skeleton pendant le 1er chargement -->
+          @if (premierChargement) {
+            @for (i of [1, 2, 3, 4, 5]; track i) {
+              <tr class="skeleton-row">
+                <td><span class="skeleton skeleton-text" style="width: 140px;"></span></td>
+                <td><span class="skeleton skeleton-text" style="width: 100px;"></span></td>
+                <td><span class="skeleton skeleton-badge"></span></td>
+                <td><span class="skeleton skeleton-icon"></span></td>
+              </tr>
+            }
+          }
+          @else {
+            @for (c of clientsFiltres; track c.id) {
+              <tr>
+                <td>
+                  <span class="vehicle-icon">
+                    <i class="bi bi-person"></i>
+                  </span>
+                  <strong>{{ c.nomClient }}</strong>
+                </td>
+
+                <td>{{ c.telephone || '—' }}</td>
+
+                <td>
+                  <span class="badge"
+                        [class.bg-success]="(c.soldeQuantite ?? 0) === 0"
+                        [class.bg-warning]="(c.soldeQuantite ?? 0) > 0">
+                    {{ (c.soldeQuantite ?? 0) | number:'1.0-2' }}
+                  </span>
+                </td>
+
+                <td class="actions-cell">
+                  <a class="btn-action btn-releve"
+                     [routerLink]="['/clients', c.id, 'releve']"
+                     title="Ouvrir le relevé">
+                    <i class="bi bi-file-earmark-text"></i>
+                    Relevé
+                  </a>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="empty-state">
+                  <i class="bi bi-inbox"></i>
+                  <p>Aucun client ne correspond à votre recherche.</p>
+                </td>
+              </tr>
+            }
+          }
+
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <span><i class="bi bi-shield-check"></i> FleetLog — Relevés clients</span>
+    </div>
+  </section>
+
+</div>

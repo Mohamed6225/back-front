@@ -1,0 +1,325 @@
+.releve-page {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  color: #263445;
+}
+
+/* ---------- Barre d'action ---------- */
+.releve-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 15px;
+  border: 1px solid #dfe5ec;
+  border-radius: 9px;
+  background: #fff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+
+  &:hover { background: #f8fafc; }
+}
+
+/* ---------- Alertes ---------- */
+.alert-danger {
+  padding: .85rem 1.1rem;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  background: #fdebec;
+  color: #bd3f47;
+  border: 1px solid #f5c9cc;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ---------- Loading ---------- */
+.releve-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 40px;
+  color: #8994a2;
+  font-style: italic;
+
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #dfe5ec;
+    border-top-color: #17365d;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- Boîte principale ---------- */
+.releve-box {
+  background: #fff;
+  padding: 30px;
+  border: 1px solid #e8edf3;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgb(25 45 70 / 3%);
+}
+
+/* ---------- En-tête ---------- */
+.releve-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid #17365d;
+  padding-bottom: 15px;
+  margin-bottom: 25px;
+}
+
+.releve-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  .brand-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #eaf0f8;
+    color: #17365d;
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+  }
+
+  h1 {
+    margin: 0;
+    color: #17365d;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  p {
+    margin: 4px 0 0;
+    color: #788494;
+    font-size: 13px;
+  }
+}
+
+.releve-meta {
+  font-size: 12px;
+  color: #566274;
+  text-align: right;
+  line-height: 1.7;
+
+  strong { color: #17365d; }
+}
+
+/* ---------- Sections ---------- */
+section {
+  margin-bottom: 25px;
+
+  h2 {
+    color: #17365d;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #edf0f4;
+
+    small {
+      font-size: 11px;
+      font-weight: 500;
+      color: #8994a2;
+      text-transform: none;
+      letter-spacing: 0;
+      margin-left: 6px;
+    }
+  }
+}
+
+/* ---------- Infos client ---------- */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+
+  > div {
+    span {
+      display: block;
+      color: #8994a2;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    strong { color: #263445; font-size: 14px; }
+  }
+}
+
+/* ---------- Résumé ---------- */
+.releve-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+
+  .summary-card {
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #edf0f4;
+    border-radius: 10px;
+
+    span {
+      display: block;
+      color: #788494;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 6px;
+    }
+
+    strong {
+      color: #17365d;
+      font-size: 20px;
+      font-weight: 750;
+      font-variant-numeric: tabular-nums;
+    }
+
+    &.total {
+      background: #eaf0f8;
+      border-color: #d4e0ef;
+
+      strong { font-size: 24px; }
+    }
+  }
+}
+
+/* ---------- Historique ---------- */
+.releve-historique table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+
+  thead th {
+    text-align: left;
+    padding: 10px;
+    background: #f8fafc;
+    color: #566274;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #e8edf3;
+    font-weight: 800;
+  }
+
+  tbody td,
+  tfoot td {
+    padding: 9px 10px;
+    border-bottom: 1px solid #f0f2f6;
+    color: #566274;
+    font-variant-numeric: tabular-nums;
+
+    &.strong {
+      font-weight: 750;
+      color: #17365d;
+    }
+
+    &.empty {
+      text-align: center;
+      padding: 30px 10px;
+      font-style: italic;
+      color: #8994a2;
+    }
+  }
+
+  tfoot td {
+    background: #f8fafc;
+    border-top: 2px solid #e8edf3;
+    border-bottom: 0;
+  }
+}
+
+/* ---------- Pied de page ---------- */
+.releve-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 40px;
+  padding-top: 15px;
+  border-top: 1px solid #e8edf3;
+  font-size: 11px;
+  color: #8994a2;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 700px) {
+  .releve-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .releve-meta {
+    text-align: left;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .releve-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .releve-historique {
+    overflow-x: auto;
+  }
+
+  .releve-footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* ---------- Impression ---------- */
+@media print {
+  .releve-page {
+    padding: 0;
+    max-width: none;
+  }
+
+  .releve-box {
+    border: none;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .releve-summary .summary-card {
+    background: #f5f5f5 !important;
+    border: 1px solid #ccc !important;
+  }
+
+  @page {
+    margin: 12mm;
+    size: A4;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

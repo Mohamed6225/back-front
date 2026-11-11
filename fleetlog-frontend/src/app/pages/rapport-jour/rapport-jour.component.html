@@ -1,0 +1,180 @@
+<div class="vehicules-page">
+
+  <!-- ============ EN-TÊTE ============ -->
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">RAPPORT</span>
+      <h1>
+        Rapport du jour
+        <small *ngIf="derniereMaj" class="text-muted ms-2"
+               style="font-size:.7em;">
+          · maj {{ derniereMaj | date:'HH:mm:ss' }}
+        </small>
+      </h1>
+      <p>Clients avec mouvement ou solde à régler.</p>
+    </div>
+
+    <div class="d-flex gap-2 align-items-end">
+      <div>
+        <label class="form-label small mb-1">Date</label>
+        <input type="date"
+               class="form-control"
+               [(ngModel)]="date"
+               (change)="onDateChange()">
+      </div>
+
+      <button class="btn-ajouter"
+              type="button"
+              (click)="exporterPdf()"
+              [disabled]="!rapport || !rapport.lignes.length || exportEnCours">
+        <span *ngIf="exportEnCours"
+              class="spinner-border spinner-border-sm me-2"></span>
+        <i class="bi bi-file-earmark-pdf" *ngIf="!exportEnCours"></i>
+        {{ exportEnCours ? 'Génération…' : 'Exporter PDF' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ RAFRAÎCHISSEMENT DISCRET ============ -->
+  <div *ngIf="rafraichissement"
+       class="alert alert-info d-flex align-items-center">
+    <span class="spinner-border spinner-border-sm me-2"></span>
+    Mise à jour…
+  </div>
+
+  <!-- ============ ERREUR ============ -->
+  <div *ngIf="erreur" class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    {{ erreur }}
+    <button class="btn btn-sm btn-outline-danger ms-3"
+            type="button" (click)="charger()">
+      Réessayer
+    </button>
+  </div>
+
+  <!-- ============ 1er chargement ============ -->
+  <div *ngIf="premierChargement" class="alert alert-info">
+    <span class="spinner-border spinner-border-sm me-2"></span>
+    Chargement du rapport…
+  </div>
+
+  <!-- ============ DONNÉES ============ -->
+  <ng-container *ngIf="rapport">
+
+    <!-- Statistiques globales -->
+    <div class="stats-grid">
+      <article class="stat-card">
+        <div class="stat-icon navy">
+          <i class="bi bi-box-seam"></i>
+        </div>
+        <div>
+          <span>Livré du jour</span>
+          <strong>{{ rapport.totalLivreJour | number:'1.0-2' }}</strong>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-icon green">
+          <i class="bi bi-cash-coin"></i>
+        </div>
+        <div>
+          <span>Réglé du jour</span>
+          <strong>{{ rapport.totalRegleJour | number:'1.0-2' }}</strong>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-icon orange">
+          <i class="bi bi-exclamation-circle"></i>
+        </div>
+        <div>
+          <span>Solde global à régler</span>
+          <strong>{{ rapport.totalSoldeGlobal | number:'1.0-2' }}</strong>
+        </div>
+      </article>
+    </div>
+
+    <!-- Tableau -->
+    <section class="table-card">
+      <div class="table-heading">
+        <div>
+          <h2>Détail par client</h2>
+          <p>{{ lignesFiltrees.length }} / {{ rapport.lignes.length }} client(s)</p>
+        </div>
+
+        <div class="search-box">
+          <i class="bi bi-search"></i>
+          <input type="search"
+                 [(ngModel)]="recherche"
+                 placeholder="Nom, téléphone…"
+                 aria-label="Rechercher un client">
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table fleet-table align-middle">
+          <thead>
+            <tr>
+              <th>CLIENT</th>
+              <th>TÉLÉPHONE</th>
+              <th class="text-end">LIVRÉ (J)</th>
+              <th class="text-end">RÉGLÉ (J)</th>
+              <th class="text-end">RESTE À PAYER</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of lignesFiltrees; track l.clientId) {
+              <tr>
+                <td><strong>{{ l.nomClient }}</strong></td>
+                <td>{{ l.telephone || '—' }}</td>
+                <td class="text-end">
+                  {{ l.quantiteLivreeJour | number:'1.0-2' }}
+                </td>
+                <td class="text-end">
+                  {{ l.quantiteRegleeJour | number:'1.0-2' }}
+                </td>
+                <td class="text-end">
+                  <span class="badge"
+                        [class.bg-success]="l.soldeActuel === 0"
+                        [class.bg-warning]="l.soldeActuel > 0">
+                    {{ l.soldeActuel | number:'1.0-2' }}
+                  </span>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">
+                  Aucun mouvement ni solde à régler pour cette date.
+                </td>
+              </tr>
+            }
+          </tbody>
+
+          <tfoot *ngIf="lignesFiltrees.length">
+            <tr class="table-light fw-bold">
+              <td colspan="2">TOTAL</td>
+              <td class="text-end">
+                {{ rapport.totalLivreJour | number:'1.0-2' }}
+              </td>
+              <td class="text-end">
+                {{ rapport.totalRegleJour | number:'1.0-2' }}
+              </td>
+              <td class="text-end">
+                {{ rapport.totalSoldeGlobal | number:'1.0-2' }}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <span>
+          <i class="bi bi-shield-check"></i>
+          FleetLog — Rapport journalier
+        </span>
+      </div>
+    </section>
+
+  </ng-container>
+
+</div>

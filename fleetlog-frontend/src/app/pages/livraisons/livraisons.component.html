@@ -1,0 +1,291 @@
+<div class="livraisons-page">
+
+  <h1>
+    Livraisons
+    @if (submitting) {
+      <span class="spinner-inline"></span>
+    }
+  </h1>
+
+  <!-- ================= SUCCÈS ================= -->
+  @if (succes) {
+    <div class="alert alert-success">
+      <i class="bi bi-check-circle-fill me-2"></i>
+      {{ succes }}
+      <button type="button" class="btn-close-alert"
+              (click)="fermerSucces()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  }
+
+  <!-- ================= ERREUR ================= -->
+  @if (erreur) {
+    <div class="alert alert-error">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      {{ erreur }}
+      <button type="button" class="btn-close-alert"
+              (click)="fermerErreur()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  }
+
+  <div class="grid">
+
+    <!-- ================= CARTE GAUCHE : FORMULAIRE ================= -->
+    <section class="card form-card">
+      <h2>Nouvelle livraison</h2>
+
+      <!-- Client -->
+      <div class="field">
+        <label for="client">Client</label>
+        <select id="client"
+                [(ngModel)]="selectedClientId"
+                (ngModelChange)="onClientChange()"
+                [disabled]="loadingClients">
+
+          <option [ngValue]="null">— Sélectionner un client —</option>
+
+          @for (c of clients; track c.id ?? $index) {
+            <option [ngValue]="c.id">
+              {{ c.nomClient }}{{ c.telephone ? ' — ' + c.telephone : '' }}
+            </option>
+          }
+
+        </select>
+      </div>
+
+      <!-- Ancien solde -->
+      @if (selectedClientId != null) {
+        <div class="solde-banner">
+          @if (loadingSituation) {
+            <span>Chargement du solde…</span>
+          } @else {
+            <span class="label">Ancien solde (quantités)</span>
+            <span class="value">{{ ancienSolde | number:'1.0-2' }}</span>
+          }
+        </div>
+      }
+
+      <!-- Date -->
+      <div class="field">
+        <label for="date">Date de livraison</label>
+        <input id="date"
+               type="date"
+               [(ngModel)]="form.dateLivraison" />
+      </div>
+
+      <!-- Quantités -->
+      <div class="row">
+        <div class="field">
+          <label for="ql">
+            Quantité livrée
+            <small>(0 = paiement d'ancien solde)</small>
+          </label>
+          <input id="ql"
+                 type="number"
+                 min="0"
+                 step="0.01"
+                 [(ngModel)]="form.quantiteLivree"
+                 placeholder="0" />
+        </div>
+
+        <div class="field">
+          <label for="qr">
+            Quantité réglée <small>(manuelle)</small>
+          </label>
+          <input id="qr"
+                 type="number"
+                 min="0"
+                 step="0.01"
+                 [(ngModel)]="form.quantiteReglee"
+                 placeholder="0" />
+        </div>
+      </div>
+
+      @if (paiementSeul) {
+        <p class="hint">
+          💡 Règlement d'ancien solde uniquement — quantité livrée = 0.
+          Plafond de règlement :
+          <strong>{{ ancienSolde | number:'1.0-2' }}</strong>.
+        </p>
+      }
+
+      @if (regleeDepasse) {
+        <p class="hint-error">
+          @if (paiementSeul) {
+            Le règlement ({{ form.quantiteReglee }}) dépasse l'ancien solde
+            ({{ ancienSolde | number:'1.0-2' }}).
+          } @else {
+            La quantité réglée ({{ form.quantiteReglee }}) dépasse la quantité
+            disponible ({{ quantiteDisponible | number:'1.0-2' }}).
+          }
+        </p>
+      }
+
+<!-- Prix / Montant -->
+<div class="row">
+  <div class="field">
+    <label for="pu">
+      Prix unitaire <small class="text-muted">(facultatif)</small>
+    </label>
+    <input id="pu"
+           type="number"
+           min="0"
+           step="0.01"
+           [(ngModel)]="form.prixUnitaire"
+           placeholder="0.00" />
+  </div>
+
+  <div class="field">
+    <label for="me">
+      Montant encaissé <small class="text-muted">(facultatif)</small>
+    </label>
+    <input id="me"
+           type="number"
+           min="0"
+           step="0.01"
+           [(ngModel)]="form.montantEncaisse"
+           placeholder="0.00" />
+  </div>
+</div>
+
+      <!-- MODE DE PAIEMENT -->
+      @if (paiementEffectue) {
+        <div class="field">
+          <label>Mode de paiement <span class="required-mark">*</span></label>
+
+          <div class="payment-options">
+
+            <label class="payment-option"
+                   [class.selected]="form.modePaiement === 'LIQUIDE'">
+              <input type="radio"
+                     name="modePaiement"
+                     value="LIQUIDE"
+                     [(ngModel)]="form.modePaiement" />
+              <span>💵 Liquide</span>
+            </label>
+
+            <label class="payment-option"
+                   [class.selected]="form.modePaiement === 'DEPOT'">
+              <input type="radio"
+                     name="modePaiement"
+                     value="DEPOT"
+                     [(ngModel)]="form.modePaiement" />
+              <span>🏦 Dépôt</span>
+            </label>
+
+          </div>
+        </div>
+      }
+
+      <!-- Montant théorique -->
+      @if (form.prixUnitaire && form.quantiteReglee) {
+        <p class="hint">
+          Montant théorique (réglé × prix) :
+          <strong>{{ montantTheorique | number:'1.0-2' }}</strong>
+        </p>
+      }
+
+      <!-- Solde calculé -->
+      <div class="solde-calc">
+        <div class="line">
+          <span>Ancien solde</span>
+          <span>{{ ancienSolde | number:'1.0-2' }}</span>
+        </div>
+
+        @if ((form.quantiteLivree ?? 0) > 0) {
+          <div class="line">
+            <span>+ Livré</span>
+            <span>{{ form.quantiteLivree | number:'1.0-2' }}</span>
+          </div>
+        }
+
+        <div class="line">
+          <span>− Réglé</span>
+          <span>{{ (form.quantiteReglee ?? 0) | number:'1.0-2' }}</span>
+        </div>
+
+        <div class="line total">
+          <span>= Nouveau solde</span>
+          <span>{{ nouveauSolde | number:'1.0-2' }}</span>
+        </div>
+      </div>
+
+      <button class="btn-primary"
+              [disabled]="!formValide || submitting"
+              (click)="onSubmit()">
+        @if (submitting) {
+          <span class="spinner-border spinner-border-sm me-2"></span>
+          Enregistrement…
+        } @else if (paiementSeul) {
+          <i class="bi bi-check-lg"></i>
+          Enregistrer le règlement
+        } @else {
+          <i class="bi bi-check-lg"></i>
+          Enregistrer la livraison
+        }
+      </button>
+    </section>
+
+    <!-- ================= CARTE DROITE : HISTORIQUE ================= -->
+    <section class="card history-card">
+
+      <h2>
+        Historique
+        @if (derniereMaj) {
+          <small class="last-update">
+            · {{ derniereMaj | date:'HH:mm:ss' }}
+          </small>
+        }
+      </h2>
+
+      @if (selectedClientId == null) {
+        <p class="empty">Sélectionnez un client pour voir son historique.</p>
+      } @else if (historique.length === 0) {
+        <p class="empty">Aucune livraison enregistrée pour ce client.</p>
+      } @else {
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Livré</th>
+              <th>Réglé</th>
+              <th>Prix U.</th>
+              <th>Encaissé</th>
+              <th>Mode paiement</th>
+              <th>Ancien solde</th>
+              <th>Nouveau solde</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of historique; track l.id) {
+              <tr>
+                <td>{{ l.dateLivraison }}</td>
+                <td>{{ l.quantiteLivree | number:'1.0-2' }}</td>
+                <td>{{ l.quantiteReglee | number:'1.0-2' }}</td>
+                <td>{{ l.prixUnitaire | number:'1.0-2' }}</td>
+                <td>{{ l.montantEncaisse | number:'1.0-2' }}</td>
+
+                <td>
+                  @if (l.modePaiement === 'LIQUIDE') {
+                    <span class="payment-badge liquide">💵 Liquide</span>
+                  } @else if (l.modePaiement === 'DEPOT') {
+                    <span class="payment-badge depot">🏦 Dépôt</span>
+                  } @else {
+                    <span class="payment-badge none">—</span>
+                  }
+                </td>
+
+                <td>{{ l.ancienSolde | number:'1.0-2' }}</td>
+                <td class="strong">{{ l.nouveauSolde | number:'1.0-2' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
+
+  </div>
+</div>

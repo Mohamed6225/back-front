@@ -1,0 +1,50 @@
+<header class="topbar">
+
+  <div class="topbar-left">
+    <button
+      type="button"
+      class="menu-toggle"
+      aria-label="Ouvrir le menu"
+      (click)="ouvrirMenu()">
+      <i class="bi bi-list"></i>
+    </button>
+
+    <div class="page-heading">
+      <h1>Gestion de flotte</h1>
+      <p>Administration et suivi du parc automobile</p>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+
+    <div class="current-date">
+      <i class="bi bi-calendar3"></i>
+      <span>{{ dateDuJour }}</span>
+    </div>
+
+    <button
+      type="button"
+      class="icon-button"
+      aria-label="Notifications"
+      title="Notifications">
+      <i class="bi bi-bell"></i>
+      <span class="notification-dot"></span>
+    </button>
+
+    <div class="user-profile">
+      <div class="user-avatar">
+        <i class="bi bi-person-fill"></i>
+      </div>
+
+      <div class="user-details">
+        <!-- Utilisation des variables dynamiques ici -->
+        <strong>{{ userName }}</strong>
+        <span>{{ userRole }}</span>
+      </div>
+
+      <i class="bi bi-chevron-down profile-chevron"></i>
+    </div>
+
+  </div>
+
+</header>

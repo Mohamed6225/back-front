@@ -1,0 +1,18 @@
+/* Dans le fichier de layout principal (là où il y a <app-sidebar> et <router-outlet>) */
+.main-content {
+  margin-left: 260px; /* Laisse la place à la sidebar */
+  width: calc(100% - 260px); /* Prend le reste de l'espace */
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: #f4f6f9;
+}
+
+/* Sur mobile (quand la sidebar est cachée) */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 10px;
+  }
+}

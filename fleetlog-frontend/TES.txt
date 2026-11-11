@@ -1,0 +1,20 @@
+
+# Créer le service API
+ng generate service core/services/api
+
+# Créer la mise en page
+ng generate component layout/sidebar
+ng generate component layout/header
+
+# Créer les pages
+ng generate component pages/dashboard
+ng generate component pages/chauffeurs
+ng generate component pages/vehicules
+ng generate component pages/affectations
+ng generate component pages/missions
+ng generate component pages/carburant
+ng generate component pages/rapport-jour
+ng generate component pages/journaux-audit
+
+
+npm install bootstrap bootstrap-icons

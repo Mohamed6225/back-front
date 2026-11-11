@@ -1,0 +1,87 @@
+<aside class="sidebar" [class.sidebar-open]="isOpen">
+
+  <div class="sidebar-brand">
+    <div class="brand-logo">
+      <i class="bi bi-truck-front-fill"></i>
+    </div>
+
+    <div class="brand-text">
+      <h2>FleetLog</h2>
+      <span>Gestion livraisons</span>
+    </div>
+
+    <button
+      class="close-sidebar"
+      type="button"
+      aria-label="Fermer le menu"
+      (click)="fermerMenu()">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+
+  <div class="sidebar-section-title">MENU PRINCIPAL</div>
+
+  <nav class="sidebar-nav" aria-label="Navigation principale">
+
+    <a routerLink="/dashboard"
+       routerLinkActive="active"
+       (click)="fermerMenu()">
+      <i class="bi bi-speedometer2"></i>
+      <span>Tableau de bord</span>
+    </a>
+
+    <a routerLink="/clients"
+       routerLinkActive="active"
+       (click)="fermerMenu()">
+      <i class="bi bi-people-fill"></i>
+      <span>Clients</span>
+    </a>
+
+    <a routerLink="/livraisons"
+       routerLinkActive="active"
+       (click)="fermerMenu()">
+      <i class="bi bi-box-seam-fill"></i>
+      <span>Livraisons</span>
+    </a>
+
+    <!-- ✅ NOUVEAU : accès aux relevés 
+    <a routerLink="/releve"
+       routerLinkActive="active"
+       (click)="fermerMenu()">
+      <i class="bi bi-file-earmark-text-fill"></i>
+      <span>Relevés</span>
+    </a>-->
+
+
+        <a routerLink="/rapports"
+      routerLinkActive="active"
+      (click)="fermerMenu()">
+      <i class="bi bi-file-earmark-text-fill"></i>
+      <span>Relevés</span>
+    </a>
+
+    <a routerLink="/depenses"
+   routerLinkActive="active"
+   (click)="fermerMenu()">
+  <i class="bi bi-wallet2"></i>
+  <span>Dépenses</span>
+</a>
+
+    <a routerLink="/rapport-jour"
+      routerLinkActive="active"
+      (click)="fermerMenu()">
+      <i class="bi bi-file-earmark-bar-graph-fill"></i>
+      <span>Rapport du jour</span>
+    </a>
+
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="status-indicator"></div>
+    <div>
+      <strong>FleetLog API</strong>
+      <span>Gestion centralisée</span>
+    </div>
+  </div>
+
+</aside>

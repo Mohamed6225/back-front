@@ -1,0 +1,327 @@
+<div class="depenses-page">
+
+  <!-- ================= EN-TÊTE ================= -->
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">FINANCES</span>
+      <h1>
+        Dépenses
+        @if (chargement) {
+          <span class="spinner-inline"></span>
+        }
+      </h1>
+      <p>
+        Enregistrez et suivez vos dépenses quotidiennes.
+        @if (derniereMaj) {
+          <small class="last-update">
+            · Mis à jour à {{ derniereMaj | date:'HH:mm:ss' }}
+          </small>
+        }
+      </p>
+    </div>
+
+    <div class="date-picker">
+      <input type="date"
+             [(ngModel)]="selectedDate"
+             (ngModelChange)="onDateChange()" />
+
+      <button class="btn-ajouter" type="button" (click)="ouvrirCreation()">
+        <i class="bi bi-plus-lg"></i>
+        Nouvelle dépense
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= SUCCÈS ================= -->
+  @if (succes) {
+    <div class="alert alert-success">
+      <i class="bi bi-check-circle-fill me-2"></i>
+      {{ succes }}
+      <button type="button"
+              class="btn-close-alert"
+              (click)="fermerSucces()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  }
+
+  <!-- ================= ERREUR ================= -->
+  @if (erreur) {
+    <div class="alert alert-danger">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      {{ erreur }}
+      <button class="btn btn-sm btn-outline-danger ms-3"
+              type="button"
+              (click)="charger()">
+        Réessayer
+      </button>
+    </div>
+  }
+
+  <!-- ================= KPI ================= -->
+  <div class="stats-grid" [class.is-refreshing]="rafraichissement">
+
+    <article class="stat-card">
+      <div class="stat-icon orange">
+        <i class="bi bi-wallet2"></i>
+      </div>
+      <div>
+        <span>Total du jour</span>
+        <strong>{{ totalJour | number:'1.0-2' }}</strong>
+      </div>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-icon navy">
+        <i class="bi bi-list-ol"></i>
+      </div>
+      <div>
+        <span>Opérations</span>
+        <strong>{{ nombreOperations }}</strong>
+      </div>
+    </article>
+
+  </div>
+
+  <!-- ================= TABLE ================= -->
+  <section class="table-card">
+
+    <div class="table-heading">
+      <h2>Liste des dépenses</h2>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table fleet-table align-middle">
+        <thead>
+          <tr>
+            <th>LIBELLÉ</th>
+            <th>CATÉGORIE</th>
+            <th>MONTANT</th>
+            <th>MODE</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody [class.is-refreshing]="rafraichissement">
+
+          <!-- ✅ Skeleton premier chargement -->
+          @if (premiereChargee) {
+            @for (i of [1, 2, 3]; track i) {
+              <tr class="skeleton-row">
+                <td><span class="skeleton skeleton-text" style="width: 140px;"></span></td>
+                <td><span class="skeleton skeleton-badge"></span></td>
+                <td><span class="skeleton skeleton-text" style="width: 80px;"></span></td>
+                <td><span class="skeleton skeleton-text" style="width: 60px;"></span></td>
+                <td><span class="skeleton skeleton-icon"></span></td>
+              </tr>
+            }
+          }
+          @else {
+            @for (d of depenses; track d.id) {
+              <tr>
+                <td>
+                  <strong>{{ d.libelle }}</strong>
+                  @if (d.description) {
+                    <small class="depense-desc">{{ d.description }}</small>
+                  }
+                </td>
+
+                <td>
+                  <span class="badge bg-light text-dark">
+                    {{ labelCategorie(d.categorie) }}
+                  </span>
+                </td>
+
+                <td>
+                  <strong class="montant">{{ d.montant | number:'1.0-2' }}</strong>
+                </td>
+
+                <td>{{ modeLabel(d.modePaiement) }}</td>
+
+                <td class="actions-cell">
+                  <button class="btn-action edit" type="button"
+                          title="Modifier"
+                          (click)="ouvrirEdition(d)">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn-action danger" type="button"
+                          title="Supprimer"
+                          (click)="demanderSuppression(d)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="empty-state">
+                  <i class="bi bi-inbox"></i>
+                  <p>Aucune dépense pour cette date.</p>
+                </td>
+              </tr>
+            }
+          }
+
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <span>
+        <i class="bi bi-shield-check"></i>
+        FleetLog — Total : {{ totalJour | number:'1.0-2' }}
+      </span>
+    </div>
+  </section>
+
+  <!-- ================= MODALE CRÉATION / ÉDITION ================= -->
+  @if (modalOuvert) {
+    <div class="modal-overlay" (click)="fermer()">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+          <h2>
+            <i class="bi"
+               [ngClass]="mode === 'creation' ? 'bi-plus-circle-fill' : 'bi-pencil-square'"></i>
+            {{ mode === 'creation' ? 'Nouvelle dépense' : 'Modifier la dépense' }}
+          </h2>
+          <button class="btn-close-modal" type="button" (click)="fermer()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+
+          @if (erreurForm) {
+            <div class="alert alert-danger">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              {{ erreurForm }}
+            </div>
+          }
+
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Libellé *</label>
+              <input type="text"
+                     [(ngModel)]="form.libelle"
+                     placeholder="Ex. : Carburant camion 12"
+                     class="form-control">
+            </div>
+
+            <div class="form-field">
+              <label>Catégorie *</label>
+              <select [(ngModel)]="form.categorie" class="form-control">
+                @for (c of categories; track c.value) {
+                  <option [value]="c.value">{{ c.label }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label>Montant *</label>
+              <input type="number"
+                     min="0"
+                     step="0.01"
+                     [(ngModel)]="form.montant"
+                     placeholder="0.00"
+                     class="form-control">
+            </div>
+
+            <div class="form-field">
+              <label>Date *</label>
+              <input type="date"
+                     [(ngModel)]="form.dateDepense"
+                     class="form-control">
+            </div>
+
+            <div class="form-field">
+              <label>Mode de paiement</label>
+              <select [(ngModel)]="form.modePaiement" class="form-control">
+                <option [ngValue]="null">—</option>
+                <option value="LIQUIDE">Liquide</option>
+                <option value="DEPOT">Dépôt</option>
+              </select>
+            </div>
+
+            <div class="form-field" style="grid-column: 1 / -1;">
+              <label>Description</label>
+              <textarea rows="2"
+                        [(ngModel)]="form.description"
+                        placeholder="Détails optionnels..."
+                        class="form-control"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" type="button"
+                  (click)="fermer()"
+                  [disabled]="enregistrement">
+            Annuler
+          </button>
+
+          <button class="btn-ajouter" type="button"
+                  (click)="enregistrer()"
+                  [disabled]="enregistrement">
+            @if (enregistrement) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            } @else {
+              <i class="bi bi-check-lg"></i>
+            }
+            {{
+              enregistrement
+                ? 'Enregistrement…'
+                : (mode === 'edition' ? 'Mettre à jour' : 'Enregistrer')
+            }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ================= MODALE CONFIRMATION SUPPRESSION ================= -->
+  @if (confirmSuppressionOuverte) {
+    <div class="modal-overlay" (click)="annulerSuppression()">
+      <div class="modal-box modal-small" (click)="$event.stopPropagation()">
+
+        <div class="modal-header danger">
+          <h2>
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            Confirmer la suppression
+          </h2>
+        </div>
+
+        <div class="modal-body">
+          <p>
+            Voulez-vous vraiment supprimer la dépense
+            <strong>{{ depenseASupprimer?.libelle }}</strong> ?
+          </p>
+
+          @if (erreurSuppression) {
+            <div class="alert alert-danger">
+              {{ erreurSuppression }}
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" type="button"
+                  (click)="annulerSuppression()"
+                  [disabled]="suppressionEnCours">
+            Annuler
+          </button>
+
+          <button class="btn-danger" type="button"
+                  (click)="confirmerSuppression()"
+                  [disabled]="suppressionEnCours">
+            @if (suppressionEnCours) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            } @else {
+              <i class="bi bi-trash"></i>
+            }
+            {{ suppressionEnCours ? 'Suppression…' : 'Supprimer' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

@@ -1,0 +1,334 @@
+<div class="vehicules-page">
+
+  <!-- ================= EN-TÊTE ================= -->
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">GESTION</span>
+      <h1>
+        Clients
+        @if (chargement) {
+          <span class="spinner-inline"></span>
+        }
+      </h1>
+      <p>Gérez vos clients et suivez leur solde de quantités à régler.</p>
+    </div>
+
+    <button class="btn-ajouter" type="button" (click)="ouvrirCreation()">
+      <i class="bi bi-plus-lg"></i>
+      Nouveau client
+    </button>
+  </div>
+
+   <!-- ================= ERREUR ================= -->
+  @if (erreur) {
+    <div class="alert alert-danger">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      {{ erreur }}
+      <button class="btn btn-sm btn-outline-danger ms-3"
+              type="button"
+              (click)="chargerClients()">
+        Réessayer
+      </button>
+    </div>
+  }
+
+  <!-- ================= SUCCÈS ✅ NOUVEAU ================= -->
+  @if (succes) {
+    <div class="alert alert-success">
+      <i class="bi bi-check-circle-fill me-2"></i>
+      {{ succes }}
+      <button type="button"
+              class="btn-close-alert"
+              aria-label="Fermer"
+              (click)="fermerSucces()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+  }
+
+  <!-- ================= KPI ================= -->
+  <div class="stats-grid" [class.is-refreshing]="rafraichissement">
+
+    <article class="stat-card">
+      <div class="stat-icon navy">
+        <i class="bi bi-people-fill"></i>
+      </div>
+      <div>
+        <span>Clients enregistrés</span>
+        <strong>{{ nombreTotal }}</strong>
+      </div>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-icon green">
+        <i class="bi bi-cash-stack"></i>
+      </div>
+      <div>
+        <span>Solde total</span>
+        <strong>{{ soldeTotal | number:'1.0-2' }}</strong>
+      </div>
+    </article>
+
+    <article class="stat-card">
+      <div class="stat-icon orange">
+        <i class="bi bi-exclamation-circle"></i>
+      </div>
+      <div>
+        <span>Clients avec solde</span>
+        <strong>{{ clientsAvecSolde }}</strong>
+      </div>
+    </article>
+
+  </div>
+
+  <!-- ================= TABLE ================= -->
+  <section class="table-card">
+
+    <div class="table-heading">
+      <div>
+        <h2>Liste des clients</h2>
+        <p>
+          @if (premierChargement) {
+            Chargement…
+          } @else {
+            {{ clientsFiltres.length }} client(s) affiché(s)
+          }
+        </p>
+      </div>
+
+      <div class="search-box">
+        <i class="bi bi-search"></i>
+        <input
+          type="search"
+          [(ngModel)]="recherche"
+          placeholder="Nom, téléphone..."
+          aria-label="Rechercher un client">
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table fleet-table align-middle">
+        <thead>
+          <tr>
+            <th>CLIENT</th>
+            <th>TÉLÉPHONE</th>
+            <th>SOLDE</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+
+        <tbody [class.is-refreshing]="rafraichissement">
+
+          @if (premierChargement) {
+            @for (i of [1, 2, 3, 4, 5]; track i) {
+              <tr class="skeleton-row">
+                <td><span class="skeleton skeleton-text" style="width: 140px;"></span></td>
+                <td><span class="skeleton skeleton-text" style="width: 100px;"></span></td>
+                <td><span class="skeleton skeleton-badge"></span></td>
+                <td><span class="skeleton skeleton-icon"></span></td>
+              </tr>
+            }
+          }
+          @else {
+            @for (client of clientsFiltres; track client.id) {
+              <tr>
+                <td>
+                  <span class="vehicle-icon">
+                    <i class="bi bi-person"></i>
+                  </span>
+                  <strong>{{ client.nomClient }}</strong>
+                </td>
+
+                <td>{{ client.telephone || '—' }}</td>
+
+                <td>
+                  <span
+                    class="badge"
+                    [class.bg-success]="(client.soldeQuantite ?? 0) === 0"
+                    [class.bg-warning]="(client.soldeQuantite ?? 0) > 0">
+                    {{ (client.soldeQuantite ?? 0) | number:'1.0-2' }}
+                  </span>
+                </td>
+
+                <!-- ✅ actions-cellulaire AVEC le bouton Relevé AJOUTÉ -->
+                <td class="actions-cell">
+                  <button class="btn-action" type="button" title="Consulter"
+                          (click)="ouvrirConsultation(client)">
+                    <i class="bi bi-eye"></i>
+                  </button>
+
+                  <!-- ✅ NOUVEAU : bouton Relevé -->
+                  <button class="btn-action" type="button" title="Relevé"
+                          [routerLink]="['/clients', client.id, 'releve']">
+                    <i class="bi bi-file-earmark-text"></i>
+                  </button>
+
+                  <button class="btn-action edit" type="button" title="Modifier"
+                          (click)="ouvrirEdition(client)">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+
+                  <button class="btn-action danger" type="button" title="Supprimer"
+                          (click)="demanderSuppression(client)">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="empty-state">
+                  <i class="bi bi-search"></i>
+                  <p>Aucun client ne correspond à votre recherche.</p>
+                </td>
+              </tr>
+            }
+          }
+
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <span><i class="bi bi-shield-check"></i> FleetLog — Gestion des clients</span>
+    </div>
+  </section>
+
+  <!-- ================= MODALE CRÉATION / ÉDITION / CONSULTATION ================= -->
+  @if (modalOuvert) {
+    <div class="modal-overlay" (click)="fermerModal()">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+          <h2>
+            <i class="bi" [ngClass]="iconeModal"></i>
+            {{ titreModal }}
+          </h2>
+          <button class="btn-close-modal" type="button" (click)="fermerModal()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <div class="modal-body">
+
+          @if (erreurFormulaire) {
+            <div class="alert alert-danger">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              {{ erreurFormulaire }}
+            </div>
+          }
+
+          @if (mode === 'consultation' && clientSelectionne) {
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span>Nom</span>
+                <strong>{{ clientSelectionne.nomClient }}</strong>
+              </div>
+              <div class="detail-item">
+                <span>Téléphone</span>
+                <strong>{{ clientSelectionne.telephone || '—' }}</strong>
+              </div>
+              <div class="detail-item">
+                <span>Solde</span>
+                <strong>{{ (clientSelectionne.soldeQuantite ?? 0) | number:'1.0-2' }}</strong>
+              </div>
+            </div>
+          }
+
+          @if (mode !== 'consultation') {
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Nom du client *</label>
+                <input type="text"
+                       [(ngModel)]="nouveauClient.nomClient"
+                       placeholder="Ex. : Ali Traoré"
+                       class="form-control">
+              </div>
+
+              <div class="form-field">
+                <label>Téléphone</label>
+                <input type="tel"
+                       [(ngModel)]="nouveauClient.telephone"
+                       placeholder="Ex. : +226 70 00 00 00"
+                       class="form-control">
+              </div>
+            </div>
+          }
+
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" type="button"
+                  (click)="fermerModal()"
+                  [disabled]="enregistrement">
+            {{ mode === 'consultation' ? 'Fermer' : 'Annuler' }}
+          </button>
+
+          @if (mode !== 'consultation') {
+            <button class="btn-ajouter" type="button"
+                    (click)="enregistrer()"
+                    [disabled]="enregistrement">
+              @if (enregistrement) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+              } @else {
+                <i class="bi bi-check-lg"></i>
+              }
+              {{
+                enregistrement
+                  ? 'Enregistrement...'
+                  : (mode === 'edition' ? 'Mettre à jour' : 'Enregistrer')
+              }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ================= MODALE CONFIRMATION SUPPRESSION ================= -->
+  @if (confirmSuppressionOuverte) {
+    <div class="modal-overlay" (click)="annulerSuppression()">
+      <div class="modal-box modal-small" (click)="$event.stopPropagation()">
+
+        <div class="modal-header danger">
+          <h2>
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            Confirmer la suppression
+          </h2>
+        </div>
+
+        <div class="modal-body">
+          <p>
+            Voulez-vous vraiment supprimer le client
+            <strong>{{ clientASupprimer?.nomClient }}</strong> ?
+          </p>
+
+          @if (erreurSuppression) {
+            <div class="alert alert-danger">
+              {{ erreurSuppression }}
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn-secondary" type="button"
+                  (click)="annulerSuppression()"
+                  [disabled]="suppressionEnCours">
+            Annuler
+          </button>
+
+          <button class="btn-danger" type="button"
+                  (click)="confirmerSuppression()"
+                  [disabled]="suppressionEnCours">
+            @if (suppressionEnCours) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            } @else {
+              <i class="bi bi-trash"></i>
+            }
+            {{ suppressionEnCours ? 'Suppression...' : 'Supprimer' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

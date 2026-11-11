@@ -1,0 +1,209 @@
+<div class="dashboard-page">
+
+  <!-- ================= EN-TÊTE IMPRESSION (caché à l'écran) ================= -->
+  <div class="print-header">
+    <h1>Rapport journalier — {{ libelleDate | titlecase }}</h1>
+    <div class="meta">
+      FleetLog — Gestion des livraisons · Généré le
+      {{ aujourdhui | date:'dd/MM/yyyy HH:mm' }}
+    </div>
+  </div>
+
+  <!-- ================= EN-TÊTE ÉCRAN (fusion unique) ================= -->
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">TABLEAU DE BORD</span>
+      <h1>
+        Statistiques du jour
+        @if (loading) {
+          <span class="spinner"></span>
+        }
+      </h1>
+      <p>{{ libelleDate | titlecase }}</p>
+    </div>
+
+    <div class="date-picker">
+      <input type="date"
+             [(ngModel)]="selectedDate"
+             (ngModelChange)="onDateChange()" />
+
+      @if (!dateAujourdhui) {
+        <button type="button" class="btn-ajouter" (click)="revenirAujourdhui()">
+          <i class="bi bi-arrow-counterclockwise"></i>
+          Aujourd'hui
+        </button>
+      }
+
+      <!-- ✅ Bouton imprimer (masqué à l'impression via .no-print du composant) -->
+      <app-print-button label="Imprimer" />
+    </div>
+  </div>
+
+  <!-- ================= ERREUR ================= -->
+  @if (errorMessage) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  }
+
+  <!-- ================= KPI ================= -->
+  <div class="stats-grid" [class.is-refreshing]="loading">
+
+    <div class="stat-card">
+      <div class="stat-icon green">
+        <i class="bi bi-cash-coin"></i>
+      </div>
+      <div>
+        <span>Montant encaissé</span>
+        <strong>{{ stats.montantEncaisseJour | number:'1.0-2' }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon navy">
+        <i class="bi bi-box-seam"></i>
+      </div>
+      <div>
+        <span>Quantité livrée</span>
+        <strong>{{ stats.quantiteLivreeJour | number:'1.0-2' }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon blue">
+        <i class="bi bi-check2-square"></i>
+      </div>
+      <div>
+        <span>Quantité réglée</span>
+        <strong>{{ stats.quantiteRegleeJour | number:'1.0-2' }}</strong>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon orange">
+        <i class="bi bi-list-check"></i>
+      </div>
+      <div>
+        <span>Opérations</span>
+        <strong>{{ stats.nombreOperations }}</strong>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ================= RÉSULTAT NET ================= -->
+<div class="net-result"
+     [class.positif]="resultatPositif"
+     [class.negatif]="!resultatPositif"
+     [class.is-refreshing]="loading">
+
+  <div class="net-result-label">
+    <i class="bi bi-graph-up-arrow"></i>
+    <span>Résultat net du jour</span>
+  </div>
+
+  <div class="net-result-value">
+    <strong>{{ resultatNet | number:'1.0-2' }}</strong>
+    <small>
+      Encaissé {{ stats.montantEncaisseJour | number:'1.0-2' }}
+      − Dépensé {{ stats.montantDepenseJour | number:'1.0-2' }}
+    </small>
+  </div>
+
+</div>
+
+<!-- ================= DÉPENSES DU JOUR ================= -->
+<div class="depenses-breakdown" [class.is-refreshing]="loading">
+
+  <div class="breakdown-header">
+    <h2>Dépenses du jour</h2>
+    <a routerLink="/depenses" class="link-see-all">
+      Gérer <i class="bi bi-arrow-right"></i>
+    </a>
+  </div>
+
+  @if (stats.montantDepenseJour === 0) {
+    <p class="empty">Aucune dépense enregistrée pour cette date.</p>
+  } @else {
+
+    <div class="depense-total">
+      <span>Total dépensé</span>
+      <strong>{{ stats.montantDepenseJour | number:'1.0-2' }}</strong>
+    </div>
+
+    @for (d of depensesParCategorieList; track d.categorie) {
+      <div class="depense-row">
+        <div class="depense-label">
+          <span class="depense-dot"></span>
+          <span>{{ labelCategorie(d.categorie) }}</span>
+        </div>
+        <div class="depense-bar">
+          <div class="depense-fill" [style.width.%]="d.part"></div>
+        </div>
+        <div class="depense-value">
+          <strong>{{ d.montant | number:'1.0-2' }}</strong>
+          <small>{{ d.part | number:'1.0-1' }} %</small>
+        </div>
+      </div>
+    }
+
+  }
+
+</div>
+
+  <!-- ================= RÉPARTITION PAIEMENTS ================= -->
+  <div class="payment-breakdown" [class.is-refreshing]="loading">
+
+    <h2>Répartition des paiements</h2>
+
+    @if (stats.montantEncaisseJour === 0) {
+      <p class="empty">Aucun paiement enregistré pour cette date.</p>
+    } @else {
+
+      <div class="breakdown-row">
+        <div class="breakdown-label">
+          <span class="dot dot-liquide"></span>
+          <span>Liquide</span>
+        </div>
+        <div class="breakdown-bar">
+          <div class="fill fill-liquide" [style.width.%]="partLiquide"></div>
+        </div>
+        <div class="breakdown-value">
+          <strong>{{ stats.montantEncaisseLiquide | number:'1.0-2' }}</strong>
+          <small>{{ partLiquide | number:'1.0-1' }} %</small>
+        </div>
+      </div>
+
+      <div class="breakdown-row">
+        <div class="breakdown-label">
+          <span class="dot dot-depot"></span>
+          <span>Dépôt</span>
+        </div>
+        <div class="breakdown-bar">
+          <div class="fill fill-depot" [style.width.%]="partDepot"></div>
+        </div>
+        <div class="breakdown-value">
+          <strong>{{ stats.montantEncaisseDepot | number:'1.0-2' }}</strong>
+          <small>{{ partDepot | number:'1.0-1' }} %</small>
+        </div>
+      </div>
+
+      @if (montantNonRenseigne > 0) {
+        <div class="breakdown-row">
+          <div class="breakdown-label">
+            <span class="dot dot-none"></span>
+            <span>Non renseigné</span>
+          </div>
+          <div class="breakdown-bar">
+            <div class="fill fill-none" [style.width.%]="partNonRenseigne"></div>
+          </div>
+          <div class="breakdown-value">
+            <strong>{{ montantNonRenseigne | number:'1.0-2' }}</strong>
+            <small>{{ partNonRenseigne | number:'1.0-1' }} %</small>
+          </div>
+        </div>
+      }
+
+    }
+
+  </div>
+
+</div>
